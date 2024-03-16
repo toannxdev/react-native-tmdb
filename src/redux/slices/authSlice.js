@@ -28,12 +28,36 @@ export const signIn = createAsyncThunk(
       // show the loading modal that can't be canceled
       dispatch(showModal({ cancelable: false }));
 
+      console.log('Signing in...', credentials);
       const { username, password } = credentials;
       // make a network request to sign in the user
       await new Promise((resolve) => setTimeout(resolve, 2000)); // simulate a network request
 
       // dispatch the login action with the user data
       dispatch(setUserState({ user: { username }, status: Status.Succeeded }));
+    } catch (error) {
+      return thunkAPI.rejectWithValue({ message: error.message });
+    } finally {
+      // hide the loading modal
+      dispatch(hideModal());
+    }
+  }
+);
+
+export const signInAsGuest = createAsyncThunk(
+  'auth/signInAsGuest',
+  async (_, { dispatch }) => {
+    try {
+      // show the loading modal that can't be canceled
+      dispatch(showModal({ cancelable: false }));
+
+      // make a network request to sign in the user
+      await new Promise((resolve) => setTimeout(resolve, 2000)); // simulate a network request
+
+      // dispatch the login action with the user data
+      dispatch(
+        setUserState({ user: { username: 'guest' }, status: Status.Succeeded })
+      );
     } catch (error) {
       return thunkAPI.rejectWithValue({ message: error.message });
     } finally {

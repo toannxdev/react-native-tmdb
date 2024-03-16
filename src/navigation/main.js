@@ -9,6 +9,7 @@ import AuthNavigator from './auth';
 import { useEffect } from 'react';
 import { getCurrentUser } from '../redux/slices/authSlice';
 import LoadingModal from '../components/modal';
+import { StatusBar } from 'expo-status-bar';
 
 const Stack = createNativeStackNavigator();
 
@@ -22,7 +23,11 @@ export default function MainNavigator() {
   }, [dispatch]);
 
   if (status === Status.Initial) {
-    return <View />;
+    return (
+      <View>
+        <StatusBar style='light' />
+      </View>
+    );
   }
 
   return (
@@ -49,6 +54,7 @@ export default function MainNavigator() {
           </>
         )}
       </Stack.Navigator>
+      <StatusBar style='light' />
       <LoadingModal />
     </NavigationContainer>
   );

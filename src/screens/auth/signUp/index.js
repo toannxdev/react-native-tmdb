@@ -3,7 +3,7 @@ import React from 'react';
 
 const SignUpScreen = () => {
   return (
-    <View>
+    <View style={styles.container}>
       <Text>SignUpScreen</Text>
     </View>
   );
@@ -11,4 +11,10 @@ const SignUpScreen = () => {
 
 export default SignUpScreen;
 
-const styles = StyleSheet.create({});
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+});
