@@ -6,20 +6,17 @@ export const getCurrentUser = createAsyncThunk(
   'auth/getCurrentUser',
   async (_, { dispatch }) => {
     try {
-      // show the loading modal
-      dispatch(showModal());
+      console.log('Getting the current user...');
 
       // make a network request to get the current user
       await new Promise((resolve) => setTimeout(resolve, 2000)); // simulate a network request
 
+      console.log('Got the current user');
       // dispatch the login action with the user data
       dispatch(setUserState({ user: null, status: Status.Succeeded }));
     } catch (error) {
       console.log('Error getting the current user:', error.message);
       return thunkAPI.rejectWithValue({ message: error.message });
-    } finally {
-      // hide the loading modal
-      dispatch(hideModal());
     }
   }
 );
@@ -28,8 +25,8 @@ export const signIn = createAsyncThunk(
   'auth/signIn',
   async (credentials, { dispatch }) => {
     try {
-      // show the loading modal
-      dispatch(showModal());
+      // show the loading modal that can't be canceled
+      dispatch(showModal({ cancelable: false }));
 
       const { username, password } = credentials;
       // make a network request to sign in the user
