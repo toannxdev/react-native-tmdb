@@ -2,9 +2,9 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Button } from '@rneui/themed';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as WebBrowser from 'expo-web-browser';
+import { useFormik } from 'formik';
 import React, { useRef, useState } from 'react';
 import {
-  Alert,
   Dimensions,
   Image,
   ImageBackground,
@@ -15,30 +15,46 @@ import {
   View,
 } from 'react-native';
 import { useDispatch } from 'react-redux';
+import * as Yup from 'yup';
 import Colors from '../../../constants/colors';
 import { signIn, signInAsGuest } from '../../../redux/slices/authSlice';
+
+const loginSchema = Yup.object().shape({
+  username: Yup.string()
+    .min(5, 'Too Short!')
+    .max(10, 'Too Long!')
+    .required('Required'),
+  password: Yup.string()
+    .min(6, 'Too Short!')
+    .max(16, 'Too Long!')
+    .required('Required'),
+});
 
 const SignInScreen = () => {
   const refInput2 = useRef();
   const [showPassword, setShowPassword] = useState(false);
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+
+  const {
+    handleChange,
+    handleSubmit,
+    handleBlur,
+    values,
+    errors,
+    isValid,
+    touched,
+  } = useFormik({
+    validationSchema: loginSchema,
+    initialValues: { username: '', password: '' },
+    onSubmit: (values) => {
+      const credentials = {
+        username: values.username,
+        password: values.password,
+      };
+      dispatch(signIn(credentials));
+    },
+  });
 
   const dispatch = useDispatch();
-
-  const onSignIn = () => {
-    const usernameRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!usernameRegex.test(username)) {
-      Alert.alert('Invalid email', 'Please enter a valid email.');
-      return;
-    }
-
-    const credentials = {
-      username: username,
-      password: password,
-    };
-    dispatch(signIn(credentials));
-  };
 
   const onContinue = () => {
     dispatch(signInAsGuest());
@@ -76,9 +92,11 @@ const SignInScreen = () => {
             returnKeyType='next'
             onSubmitEditing={() => refInput2.current.focus()}
             blurOnSubmit={false}
+            onBlur={handleBlur('username')}
             style={[styles.textInput, { marginTop: 100 }]}
-            onChangeText={setUsername}
+            onChangeText={handleChange('username')}
           />
+          <Text style={styles.errorText}>{errors.username}</Text>
 
           <View style={[styles.passwordInput, { marginTop: 12 }]}>
             <TextInput
@@ -86,9 +104,10 @@ const SignInScreen = () => {
               placeholder='Password'
               returnKeyType='done'
               secureTextEntry={!showPassword}
+              onBlur={handleBlur('password')}
               style={{ flex: 1 }}
-              onSubmitEditing={onSignIn}
-              onChangeText={setPassword}
+              onSubmitEditing={handleSubmit}
+              onChangeText={handleChange('password')}
             />
 
             <MaterialCommunityIcons
@@ -99,6 +118,8 @@ const SignInScreen = () => {
               onPress={toggleShowPassword}
             />
           </View>
+          <Text style={styles.errorText}>{errors.password}</Text>
+
           <Button
             title='Sign In'
             buttonStyle={styles.button}
@@ -106,7 +127,8 @@ const SignInScreen = () => {
               width: '80%',
               marginTop: 60,
             }}
-            onPress={onSignIn}
+            disabled={!isValid}
+            onPress={handleSubmit}
           />
 
           <View
@@ -195,5 +217,10 @@ const styles = StyleSheet.create({
     color: Colors.primary,
     fontSize: 16,
     marginLeft: 8,
+  },
+  errorText: {
+    color: 'red',
+    width: '80%',
+    marginTop: 2,
   },
 });
