@@ -6,7 +6,7 @@ import {
   createRequestToken,
   createSession,
   validateWithLogin,
-} from '../../api/apiService';
+} from '../../api/authApi';
 import AppConfig from '../../constants/appConfig';
 import Status from '../../constants/status';
 import { hideModal, showModal } from './modalSlice';
