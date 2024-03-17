@@ -21,11 +21,11 @@ import { signIn, signInAsGuest } from '../../../redux/slices/authSlice';
 
 const loginSchema = Yup.object().shape({
   username: Yup.string()
-    .min(5, 'Too Short!')
+    .min(4, 'Too Short!')
     .max(10, 'Too Long!')
     .required('Required'),
   password: Yup.string()
-    .min(6, 'Too Short!')
+    .min(4, 'Too Short!')
     .max(16, 'Too Long!')
     .required('Required'),
 });
@@ -92,6 +92,7 @@ const SignInScreen = () => {
             returnKeyType='next'
             onSubmitEditing={() => refInput2.current.focus()}
             blurOnSubmit={false}
+            autoCapitalize='none'
             onBlur={handleBlur('username')}
             style={[styles.textInput, { marginTop: 100 }]}
             onChangeText={handleChange('username')}

@@ -1,4 +1,13 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
+import moment from 'moment';
+import {
+  createGuestSession,
+  createRequestToken,
+  createSession,
+  validateWithLogin,
+} from '../../api/apiService';
+import AppConfig from '../../constants/appConfig';
 import Status from '../../constants/status';
 import { hideModal, showModal } from './modalSlice';
 
@@ -8,15 +17,39 @@ export const getCurrentUser = createAsyncThunk(
     try {
       console.log('Getting the current user...');
 
-      // make a network request to get the current user
-      await new Promise((resolve) => setTimeout(resolve, 2000)); // simulate a network request
+      // get the session from local storage
+      const session = await AsyncStorage.getItem('session_id');
+      const guestSession = await AsyncStorage.getItem('guest_session_id');
 
-      console.log('Got the current user');
-      // dispatch the login action with the user data
-      dispatch(setUserState({ user: null, status: Status.Succeeded }));
+      if (session) {
+        console.log('Got the current user:', session);
+        // dispatch the login action with the user data
+        dispatch(setUserState({ session: session, status: Status.Succeeded }));
+      } else if (guestSession) {
+        const expiresAt = await AsyncStorage.getItem('expires_at');
+
+        const expired = moment(expiresAt, AppConfig.serverFormatDate);
+        const now = new Date();
+
+        if (expiresAt && expired.toDate().getTime() > now.getTime()) {
+          console.log('Got the current guest:', guestSession);
+          // dispatch the login action with the user data
+          dispatch(
+            setUserState({ session: guestSession, status: Status.Succeeded })
+          );
+        } else {
+          console.log('Guest session expired');
+          await AsyncStorage.removeItem('guest_session_id');
+          await AsyncStorage.removeItem('expires_at');
+          dispatch(setUserState({ session: null, status: Status.Succeeded }));
+        }
+      } else {
+        console.log('No session found');
+        dispatch(setUserState({ session: null, status: Status.Succeeded }));
+      }
     } catch (error) {
       console.log('Error getting the current user:', error.message);
-      return thunkAPI.rejectWithValue({ message: error.message });
+      dispatch(setUserState({ session: null, status: Status.Succeeded }));
     }
   }
 );
@@ -27,16 +60,26 @@ export const signIn = createAsyncThunk(
     try {
       // show the loading modal that can't be canceled
       dispatch(showModal({ cancelable: false }));
-
       console.log('Signing in...', credentials);
       const { username, password } = credentials;
-      // make a network request to sign in the user
-      await new Promise((resolve) => setTimeout(resolve, 2000)); // simulate a network request
+
+      // create request token
+      const { request_token } = await createRequestToken();
+
+      // validate with login
+      await validateWithLogin(request_token, username, password);
+
+      // create session
+      const { session_id } = await createSession(request_token);
+
+      // store session in local storage
+      await AsyncStorage.setItem('session_id', session_id);
+      console.log('Signed in:', session_id);
 
       // dispatch the login action with the user data
-      dispatch(setUserState({ user: { username }, status: Status.Succeeded }));
+      dispatch(setUserState({ session: session_id, status: Status.Succeeded }));
     } catch (error) {
-      return thunkAPI.rejectWithValue({ message: error.message });
+      dispatch(setUserState({ session: null, status: Status.Succeeded }));
     } finally {
       // hide the loading modal
       dispatch(hideModal());
@@ -50,13 +93,21 @@ export const signInAsGuest = createAsyncThunk(
     try {
       // show the loading modal that can't be canceled
       dispatch(showModal({ cancelable: false }));
+      console.log('Signing in as a guest...');
 
-      // make a network request to sign in the user
-      await new Promise((resolve) => setTimeout(resolve, 2000)); // simulate a network request
+      // create guest session
+      const { guest_session_id, expires_at } = await createGuestSession();
+
+      // store session in local storage
+      await AsyncStorage.setItem('guest_session_id', guest_session_id);
+      await AsyncStorage.setItem('expires_at', expires_at);
 
       // dispatch the login action with the user data
       dispatch(
-        setUserState({ user: { username: 'guest' }, status: Status.Succeeded })
+        setUserState({
+          session: guest_session_id,
+          status: Status.Succeeded,
+        })
       );
     } catch (error) {
       return thunkAPI.rejectWithValue({ message: error.message });
@@ -69,7 +120,7 @@ export const signInAsGuest = createAsyncThunk(
 
 const initialState = {
   status: Status.Initial,
-  user: null,
+  session: null,
 };
 
 export const authSlice = createSlice({
@@ -77,8 +128,7 @@ export const authSlice = createSlice({
   initialState: initialState,
   reducers: {
     setUserState: (state, action) => {
-      state.user = action.payload.user;
-      state.status = action.payload.status;
+      Object.assign(state, action.payload);
     },
   },
   extraReducers: (builder) => {
