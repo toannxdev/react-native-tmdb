@@ -22,6 +22,24 @@ const responseLog = (res) => {
   );
 };
 
+const responseErrorLog = (error) => {
+  const randomColor = `rgba(${Math.round(Math.random() * 255)},${Math.round(
+    Math.random() * 255
+  )},${Math.round(Math.random() * 255)})`;
+
+  console.warn(
+    '┍------------------------------------------------------------------┑',
+  );
+  console.warn('| Url:', error.request._url);
+  console.warn('| Method:', error.config.method);
+  console.warn('| Headers:', error.config.headers);
+  if (error.config.data !== undefined) console.log('| Body:', error.config.data);
+  console.warn('| Error:', error.message);
+  console.warn(
+    '┕------------------------------------------------------------------┙',
+  );
+}
+
 const instance = axios.create({
   baseURL: AppConfig.baseUrl,
   timeout: 1000 * 5,
@@ -52,7 +70,7 @@ instance.interceptors.response.use(
     return response.data;
   },
   function (error) {
-    console.warn('error', error);
+    responseErrorLog(error)
     if (error.code === 'ECONNABORTED') {
       return Promise.reject({ msg: '网络超时' });
     }

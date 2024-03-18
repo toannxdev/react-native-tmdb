@@ -1,19 +1,20 @@
 import { Feather } from '@expo/vector-icons';
 import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs';
+import colors from '../constants/colors';
 import HomeScreen from '../screens/home/home';
 import SearchScreen from '../screens/home/search';
 import WatchListScreen from '../screens/home/watchList';
-
-// export const HomeStackParamList = {
-//   Home: undefined,
-//   Details: { itemId: null, otherParam: null },
-// };
 
 const Tab = createMaterialBottomTabNavigator();
 
 export default function HomeNavigator() {
   return (
-    <Tab.Navigator>
+    <Tab.Navigator
+      activeColor='white'
+      inactiveColor='gray'
+      barStyle={{ backgroundColor: colors.background }}
+      activeIndicatorStyle={{ backgroundColor: 'transparent' }}
+    >
       <Tab.Screen
         name='Home'
         component={HomeScreen}
