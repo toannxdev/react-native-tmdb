@@ -1,24 +1,35 @@
 import { Feather } from '@expo/vector-icons';
-import { useCallback, useEffect, useState } from 'react';
-import { StyleSheet, TextInput, View } from 'react-native';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { Pressable, StyleSheet, TextInput, View } from 'react-native';
 import colors from '../constants/colors';
 
 const Search = (props) => {
   const [text, setText] = useState('');
   const { value, onChangeText } = props;
+  const inputRef = useRef(null);
   useDebounce(() => onChangeText(text), [text], 800);
+  useEffect(() => requestFocus(), []);
+
+  const requestFocus = () => {
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
+  };
 
   return (
-    <View style={styles.container}>
-      <TextInput
-        value={value}
-        style={styles.input}
-        placeholder='Search'
-        placeholderTextColor={colors.gray}
-        onChangeText={setText}
-      />
-      <Feather name='search' size={24} color={colors.gray} />
-    </View>
+    <Pressable onPress={requestFocus}>
+      <View style={styles.container}>
+        <TextInput
+          ref={inputRef}
+          value={value}
+          style={styles.input}
+          placeholder='Search'
+          placeholderTextColor={colors.gray}
+          onChangeText={setText}
+        />
+        <Feather name='search' size={24} color={colors.gray} />
+      </View>
+    </Pressable>
   );
 };
 
@@ -30,13 +41,12 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surfaceContainer,
     borderRadius: 16,
     alignItems: 'center',
-    paddingHorizontal: 8,
+    paddingHorizontal: 16,
     height: 48,
     marginHorizontal: 16,
   },
   input: {
     flex: 1,
-    paddingHorizontal: 8,
     color: colors.onBackground,
   },
 });
