@@ -4,13 +4,48 @@ import Status from '../../../../constants/status';
 
 export const searchMoviesByQuery = createAsyncThunk(
   'movie/search',
-  async (keyword, { dispatch }) => {
+  async (payload, { dispatch }) => {
     try {
       // Set the status to in progress
       dispatch(setStatus(Status.InProgress));
 
-      const { results } = await searchMovies(keyword);
-      dispatch(setResults({ results, keyword, status: Status.Succeeded }));
+      const { page, results, total_pages } = await searchMovies(
+        payload.query,
+        payload.page ?? 1
+      );
+      const isLastPage = page >= total_pages;
+
+      if (payload.page === 1) {
+        // clear the previous results
+        dispatch(
+          setResults({
+            results: [],
+            query: payload.query,
+            status: Status.Succeeded,
+            isLastPage: isLastPage,
+            page: page,
+          })
+        );
+        dispatch(
+          setResults({
+            results,
+            query: payload.query,
+            status: Status.Succeeded,
+            isLastPage: isLastPage,
+            page: page,
+          })
+        );
+        return;
+      }
+      dispatch(
+        addResults({
+          results,
+          query: payload.query,
+          status: Status.Succeeded,
+          isLastPage: isLastPage,
+          page: page,
+        })
+      );
     } catch (error) {
       console.log('Error fetching suggestions:', error.message);
       dispatch(setStatus(Status.Failed));
@@ -19,9 +54,11 @@ export const searchMoviesByQuery = createAsyncThunk(
 );
 
 const initialState = {
-  keyword: '',
+  query: '',
   movies: [],
+  isLastPage: false,
   status: Status.Initial,
+  page: 1,
 };
 
 const movieSearchSlice = createSlice({
@@ -29,9 +66,18 @@ const movieSearchSlice = createSlice({
   initialState: initialState,
   reducers: {
     setResults: (state, action) => {
-      state.keyword = action.payload;
+      state.query = action.payload.query;
       state.movies = action.payload.results;
       state.status = action.payload.status;
+      state.isLastPage = action.payload.isLastPage;
+      state.page = action.payload.page;
+    },
+    addResults: (state, action) => {
+      state.query = action.payload.query;
+      state.movies = [...state.movies, ...action.payload.results];
+      state.status = action.payload.status;
+      state.isLastPage = action.payload.isLastPage;
+      state.page = action.payload.page;
     },
     setStatus: (state, action) => {
       state.status = action.payload;
@@ -39,5 +85,5 @@ const movieSearchSlice = createSlice({
   },
 });
 
-export const { setResults, setStatus } = movieSearchSlice.actions;
+export const { setResults, setStatus, addResults } = movieSearchSlice.actions;
 export default movieSearchSlice.reducer;

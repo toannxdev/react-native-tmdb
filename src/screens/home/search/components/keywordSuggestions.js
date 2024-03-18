@@ -36,10 +36,8 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginTop: 16,
     marginBottom: 4,
-    marginHorizontal: 16,
   },
   wrapList: {
-    marginHorizontal: 16,
     flexDirection: 'row',
     flexWrap: 'wrap',
   },

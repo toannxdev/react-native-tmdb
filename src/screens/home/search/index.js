@@ -4,7 +4,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useDispatch } from 'react-redux';
 import Search from '../../../components/search';
 import colors from '../../../constants/colors';
-import KeywordSuggestions from './components/keywordSuggestions';
 import SearchContent from './components/searchContent';
 import { fetchKeywordSuggestions } from './slices/keywordSlice';
 import { searchMoviesByQuery } from './slices/movieSearchSlice';
@@ -25,12 +24,14 @@ const SearchScreen = () => {
     >
       <Search
         onChangeText={(text) => {
+          if (!text) {
+            return;
+          }
           dispatch(fetchKeywordSuggestions(text));
-          dispatch(searchMoviesByQuery(text));
+          dispatch(searchMoviesByQuery({ query: text }));
         }}
       />
 
-      <KeywordSuggestions />
       <SearchContent />
     </View>
   );
