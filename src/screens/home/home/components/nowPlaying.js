@@ -6,6 +6,7 @@ import Carousel from 'react-native-reanimated-carousel';
 import { useDispatch, useSelector } from 'react-redux';
 import colors from '../../../../constants/colors';
 import { fetchNowPlaying } from '../slices/nowPlayingSlice';
+import PaginationItem from './paginationItem';
 
 const width = Dimensions.get('window').width;
 
@@ -35,16 +36,17 @@ const NowPlayingList = () => {
 
   return (
     <View style={{ alignItems: 'center' }}>
-      <Image
-        source={{
-          uri: `http://image.tmdb.org/t/p/w300/${movies[currentIndex].backdrop_path}`,
-          cache: 'force-cache',
-        }}
-        resizeMode='cover'
-        style={StyleSheet.absoluteFillObject}
-        blurRadius={10}
-      />
-
+      {movies && movies.length > 0 && (
+        <Image
+          source={{
+            uri: `http://image.tmdb.org/t/p/w300/${movies[currentIndex].backdrop_path}`,
+            cache: 'force-cache',
+          }}
+          resizeMode='cover'
+          style={StyleSheet.absoluteFillObject}
+          blurRadius={10}
+        />
+      )}
       <LinearGradient
         colors={['rgba(0,0,0,0.2)', 'rgba(0,0,0,0.5)', colors.background]}
         style={StyleSheet.absoluteFillObject}
@@ -69,12 +71,31 @@ const NowPlayingList = () => {
           CarouselItem({ item: movies[index], index: index })
         }
       />
-      {/* <Pagination
-        animValue={progressValue}
-        index={currentIndex}
-        length={movies.length}
-        width={20}
-      /> */}
+      {movies && movies.length > 0 && (
+        <View
+          style={{
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            width: movies.length * 10 * 1.35, // 1.35 is the width of the pagination item
+            alignSelf: 'center',
+          }}
+        >
+          {movies.map((_, index) => {
+            return (
+              <PaginationItem
+                activeColor={colors.primary}
+                inactiveColor={colors.gray}
+                animValue={progressValue}
+                index={index}
+                key={index}
+                isRotate={false}
+                length={movies.length}
+                width={10}
+              />
+            );
+          })}
+        </View>
+      )}
     </View>
   );
 };
