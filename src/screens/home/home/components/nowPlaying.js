@@ -4,9 +4,9 @@ import { Dimensions, Image, StyleSheet, View } from 'react-native';
 import { useSharedValue } from 'react-native-reanimated';
 import Carousel from 'react-native-reanimated-carousel';
 import { useDispatch, useSelector } from 'react-redux';
+import PaginationItem from '../../../../components/paginationItem';
 import colors from '../../../../constants/colors';
 import { fetchNowPlaying } from '../slices/nowPlayingSlice';
-import PaginationItem from './paginationItem';
 
 const width = Dimensions.get('window').width;
 

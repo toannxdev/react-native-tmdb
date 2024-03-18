@@ -1,24 +1,19 @@
 import { Ionicons } from '@expo/vector-icons';
-import React, { useEffect } from 'react';
-import { FlatList, Image, StyleSheet, View } from 'react-native';
+import React from 'react';
+import { FlatList, Image, Pressable, StyleSheet, View } from 'react-native';
 import { Title } from 'react-native-paper';
-import { useDispatch, useSelector } from 'react-redux';
-import { fetchPopular } from '../slices/popularSlice';
 
-const Popular = () => {
-  const dispatch = useDispatch();
-  const { movies } = useSelector((state) => state.popular);
+const MovieHorizontalList = (props) => {
+  const { title, movies, onSeeAllPress, onItemPress } = props;
 
-  useEffect(() => {
-    dispatch(fetchPopular({ page: 1 }));
-  }, [dispatch]);
-
-  console.log('Popular movies:', movies.length);
   return (
     <View style={styles.container}>
       <View style={styles.titleContainer}>
-        <Title style={styles.title}>Popular</Title>
-        <Ionicons name='arrow-forward' size={24} color='white' />
+        <Title style={styles.title}>{title}</Title>
+        <Pressable
+          onPress={onSeeAllPress}
+          children={<Ionicons name='arrow-forward' size={24} color='white' />}
+        />
       </View>
       {movies && movies.length > 0 && (
         <FlatList
@@ -26,14 +21,19 @@ const Popular = () => {
           horizontal
           data={movies}
           ItemSeparatorComponent={() => <View style={{ width: 10 }} />}
-          renderItem={({ item }) => PopularItemView(item)}
+          renderItem={({ item }) => (
+            <Pressable
+              onPress={() => onItemPress(item)}
+              children={MovieItem(item)}
+            />
+          )}
         />
       )}
     </View>
   );
 };
 
-export default Popular;
+export default MovieHorizontalList;
 
 const styles = StyleSheet.create({
   container: {
@@ -57,7 +57,7 @@ const styles = StyleSheet.create({
   },
 });
 
-const PopularItemView = (item) => {
+const MovieItem = (item) => {
   return (
     <View style={styles.itemContainer}>
       <Image
