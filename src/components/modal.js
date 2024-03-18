@@ -11,9 +11,9 @@ import {
 import { useDispatch, useSelector } from 'react-redux';
 import { hideModal } from '../redux/slices/modalSlice';
 
-const LoadingModal = ({ cancelable = true }) => {
+const LoadingModal = () => {
   const dispatch = useDispatch();
-  const visible = useSelector((state) => state.modal.visible);
+  const { visible, cancelable } = useSelector((state) => state.modal);
 
   const [backgroundColor, setBackgroundColor] = useState(new Animated.Value(0));
 
@@ -40,7 +40,9 @@ const LoadingModal = ({ cancelable = true }) => {
 
   return (
     <>
-      <StatusBar backgroundColor={visible ? 'rgba(0, 0, 0, 0.5)' : 'transparent'} />
+      <StatusBar
+        backgroundColor={visible ? 'rgba(0, 0, 0, 0.5)' : 'transparent'}
+      />
       <Modal
         animationType='fade'
         transparent={true}

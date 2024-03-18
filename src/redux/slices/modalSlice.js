@@ -1,6 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit';
 
-const initialState = { visible: false, content: null };
+const initialState = { visible: false, cancelable: true };
 
 export const modalSlice = createSlice({
   name: 'modal',
@@ -8,11 +8,10 @@ export const modalSlice = createSlice({
   reducers: {
     showModal: (state, action) => {
       state.visible = true;
-      state.content = action.payload;
+      state.cancelable = action.payload.cancelable;
     },
     hideModal: (state) => {
-      state.visible = false;
-      state.content = null;
+      state.visible = initialState.visible;
     },
   },
 });

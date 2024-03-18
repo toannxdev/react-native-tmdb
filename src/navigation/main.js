@@ -1,19 +1,21 @@
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import HomeNavigator from './home';
-import DetailsScreen from '../screens/details';
-import { useDispatch, useSelector } from 'react-redux';
-import Status from '../constants/status';
-import { StyleSheet, Text, View } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
-import AuthNavigator from './auth';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
-import { getCurrentUser } from '../redux/slices/authSlice';
+import { View } from 'react-native';
+import { useDispatch, useSelector } from 'react-redux';
 import LoadingModal from '../components/modal';
+import Status from '../constants/status';
+import { getCurrentUser } from '../redux/slices/authSlice';
+import DetailsScreen from '../screens/details';
+import AuthNavigator from './auth';
+import HomeNavigator from './home';
 
 const Stack = createNativeStackNavigator();
 
 export default function MainNavigator() {
-  const { user, status } = useSelector((state) => state.auth);
+  console.log('Build MainNavigator');
+  const { session, status } = useSelector((state) => state.auth);
 
   const dispatch = useDispatch();
 
@@ -22,13 +24,17 @@ export default function MainNavigator() {
   }, [dispatch]);
 
   if (status === Status.Initial) {
-    return <View />;
+    return (
+      <View>
+        <StatusBar style='light' />
+      </View>
+    );
   }
 
   return (
     <NavigationContainer>
       <Stack.Navigator>
-        {user == null ? (
+        {!session ? (
           <Stack.Screen
             name='auth'
             component={AuthNavigator}
@@ -49,15 +55,8 @@ export default function MainNavigator() {
           </>
         )}
       </Stack.Navigator>
+      <StatusBar style='light' />
       <LoadingModal />
     </NavigationContainer>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-});
