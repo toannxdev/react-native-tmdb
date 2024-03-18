@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { ScrollView, StyleSheet } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useDispatch, useSelector } from 'react-redux';
 import colors from '../../../constants/colors';
 import MovieHorizontalList from './components/movieHorizontalList';
@@ -21,8 +22,8 @@ const HomeScreen = () => {
   }, [dispatch]);
 
   return (
-    <ScrollView>
-      <View style={styles.container}>
+    <GestureHandlerRootView style={styles.container}>
+      <ScrollView>
         <NowPlayingList />
         <MovieHorizontalList
           movies={popularList}
@@ -54,8 +55,8 @@ const HomeScreen = () => {
             console.log('Pressed', movie.title);
           }}
         />
-      </View>
-    </ScrollView>
+      </ScrollView>
+    </GestureHandlerRootView>
   );
 };
 
