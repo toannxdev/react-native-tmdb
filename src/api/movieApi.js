@@ -23,3 +23,15 @@ export const getUpcomingList = async (page = 1) => {
     params: { page: page, language: 'en-US' },
   });
 };
+
+export const searchMovies = async (query, page = 1) => {
+  return await api.get('/search/movie', {
+    params: { query: query, page: page, language: 'en-US' },
+  });
+};
+
+export const fetchSuggestionKeywords = async (query) => {
+  return await api.get('/search/keyword', {
+    params: { query: query, language: 'en-US' },
+  });
+};

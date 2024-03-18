@@ -3,6 +3,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import { View } from 'react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useDispatch, useSelector } from 'react-redux';
 import LoadingModal from '../components/modal';
 import Status from '../constants/status';
@@ -32,31 +33,33 @@ export default function MainNavigator() {
   }
 
   return (
-    <NavigationContainer>
-      <Stack.Navigator>
-        {!session ? (
-          <Stack.Screen
-            name='auth'
-            component={AuthNavigator}
-            options={{ headerShown: false, animation: 'fade' }}
-          />
-        ) : (
-          <>
+    <SafeAreaProvider>
+      <NavigationContainer>
+        <Stack.Navigator>
+          {!session ? (
             <Stack.Screen
-              name='main'
-              component={HomeNavigator}
+              name='auth'
+              component={AuthNavigator}
               options={{ headerShown: false, animation: 'fade' }}
             />
-            <Stack.Screen
-              name='details'
-              component={DetailsScreen}
-              options={{ headerShown: false }}
-            />
-          </>
-        )}
-      </Stack.Navigator>
-      <StatusBar style='light' />
-      <LoadingModal />
-    </NavigationContainer>
+          ) : (
+            <>
+              <Stack.Screen
+                name='main'
+                component={HomeNavigator}
+                options={{ headerShown: false, animation: 'fade' }}
+              />
+              <Stack.Screen
+                name='details'
+                component={DetailsScreen}
+                options={{ headerShown: false }}
+              />
+            </>
+          )}
+        </Stack.Navigator>
+        <StatusBar style='light' />
+        <LoadingModal />
+      </NavigationContainer>
+    </SafeAreaProvider>
   );
 }
