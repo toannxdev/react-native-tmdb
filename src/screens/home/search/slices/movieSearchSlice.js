@@ -36,6 +36,7 @@ export const searchMoviesByQuery = createAsyncThunk(
 
       if (payload.page === 1 || !isSameQuery) {
         // clear the previous results
+        console.log('Setting results:', results.length);
         dispatch(
           setResults({
             results: [],
@@ -56,6 +57,8 @@ export const searchMoviesByQuery = createAsyncThunk(
         );
         return;
       }
+
+      console.log('Adding results:', results.length);
       dispatch(
         addResults({
           results,

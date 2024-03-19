@@ -25,8 +25,7 @@ const SearchContent = () => {
   const onEndReached = () => {
     if (
       status === Status.Succeeded &&
-      onEndReachedCalledDuringMomentum === false &&
-      lastQuery !== query
+      onEndReachedCalledDuringMomentum === false
     ) {
       lastQuery = query;
       dispatch(searchMoviesByQuery({ query, page: page + 1 }));
@@ -37,7 +36,8 @@ const SearchContent = () => {
   const onRefresh = () => {
     console.log('onRefresh');
     setRefreshing(true);
-    dispatch(searchMoviesByQuery({ query, page: 1, forceRefresh: true}));
+    dispatch(searchMoviesByQuery({ query, page: 1, forceRefresh: true }));
+    onEndReachedCalledDuringMomentum = true;
   };
 
   if (refreshing && status !== Status.InProgress) {

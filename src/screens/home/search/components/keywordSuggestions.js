@@ -1,6 +1,8 @@
 import React from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
+import { fetchKeywordSuggestions } from '../slices/keywordSlice';
+import { searchMoviesByQuery } from '../slices/movieSearchSlice';
 
 const KeywordSuggestions = () => {
   const dispatch = useDispatch();
@@ -12,7 +14,8 @@ const KeywordSuggestions = () => {
 
   const onPress = (item) => {
     console.log('Pressed', item.name);
-    // setSearchText(item.name);
+    dispatch(searchMoviesByQuery({ query: item.name }));
+    dispatch(fetchKeywordSuggestions(item.name));
   };
 
   return (

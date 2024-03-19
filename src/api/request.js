@@ -15,7 +15,7 @@ const responseLog = (res) => {
   console.log('| Headers:', res.config.headers);
   console.log('| Date:', res.headers.date);
   if (res.config.data !== undefined) console.log('| Body:', res.config.data);
-  console.log('| Response:', res.data);
+  // console.log('| Response:', res.data);
   console.log(
     '%c┕------------------------------------------------------------------┙',
     `color:${randomColor};`
