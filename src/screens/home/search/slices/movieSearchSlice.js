@@ -4,8 +4,27 @@ import Status from '../../../../constants/status';
 
 export const searchMoviesByQuery = createAsyncThunk(
   'movie/search',
-  async (payload, { dispatch }) => {
+  async (payload, thunkAPI) => {
     try {
+      // If the query is the same as the previous query, do not fetch again
+      const state = thunkAPI.getState().movieSearch;
+      const isSameQuery = state.query === payload.query;
+      if (isSameQuery && payload.page === state.page && !payload.forceRefresh) {
+        return;
+      }
+      const { dispatch } = thunkAPI;
+      if (payload.query === '') {
+        dispatch(
+          setResults({
+            results: [],
+            query: payload.query,
+            status: Status.Succeeded,
+            isLastPage: true,
+          })
+        );
+        return;
+      }
+
       // Set the status to in progress
       dispatch(setStatus(Status.InProgress));
 
@@ -15,7 +34,7 @@ export const searchMoviesByQuery = createAsyncThunk(
       );
       const isLastPage = page >= total_pages;
 
-      if (payload.page === 1) {
+      if (payload.page === 1 || !isSameQuery) {
         // clear the previous results
         dispatch(
           setResults({

@@ -1,23 +1,19 @@
 import React from 'react';
-import {
-  FlatList,
-  Image,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { FlatList, Image, StyleSheet, Text, View } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import NoItemFound from '../../../../components/no_item_found';
-import TextTile from '../../../../components/textTile';
 import colors from '../../../../constants/colors';
 import Status from '../../../../constants/status';
-import { getPosterUrl, movieGenreNames } from '../../../../utils/utils';
 import { searchMoviesByQuery } from '../slices/movieSearchSlice';
 import KeywordSuggestions from './keywordSuggestions';
+import MovieItem from './movieItem';
+
+let lastQuery = null;
+let onEndReachedCalledDuringMomentum = false;
 
 const SearchContent = () => {
   const dispatch = useDispatch();
+  const [refreshing, setRefreshing] = React.useState(false);
   const { movies, status, query, page } = useSelector(
     (state) => state.movieSearch
   );
@@ -27,21 +23,31 @@ const SearchContent = () => {
   };
 
   const onEndReached = () => {
-    console.log('end reached');
-    if (status === Status.Succeeded) {
+    if (
+      status === Status.Succeeded &&
+      onEndReachedCalledDuringMomentum === false &&
+      lastQuery !== query
+    ) {
+      lastQuery = query;
       dispatch(searchMoviesByQuery({ query, page: page + 1 }));
+      onEndReachedCalledDuringMomentum = true;
     }
   };
 
   const onRefresh = () => {
     console.log('onRefresh');
-    dispatch(searchMoviesByQuery({ query, page: 1 }));
+    setRefreshing(true);
+    dispatch(searchMoviesByQuery({ query, page: 1, forceRefresh: true}));
   };
+
+  if (refreshing && status !== Status.InProgress) {
+    setRefreshing(false);
+  }
 
   return (
     <View style={styles.container}>
       <FlatList
-        style={{ flex: 1, marginHorizontal: 16 }}
+        style={{ flexGrow: 1, marginHorizontal: 16 }}
         data={movies}
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) =>
@@ -51,18 +57,19 @@ const SearchContent = () => {
           })
         }
         ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
-        refreshing={status === 'loading'}
+        refreshing={refreshing}
         onRefresh={onRefresh}
         onEndReached={onEndReached}
-        ListHeaderComponent={() => {
-          return (
-            <View style={{ marginBottom: 16 }}>
-              <KeywordSuggestions />
-            </View>
-          );
+        onMomentumScrollBegin={() => {
+          onEndReachedCalledDuringMomentum = false;
         }}
+        contentContainerStyle={styles.listContentContainer}
+        ListHeaderComponent={() => (
+          <View style={{ marginBottom: 16 }}>
+            <KeywordSuggestions />
+          </View>
+        )}
         ListEmptyComponent={() => {
-          console.log('status:', status, query);
           if (status === Status.InProgress) {
             return <Text style={styles.text}>Shimmer Loading...</Text>;
           }
@@ -70,7 +77,7 @@ const SearchContent = () => {
             status === Status.Initial ||
             (status === Status.Succeeded && query === '')
           ) {
-            return <Text style={styles.text}>Search history</Text>;
+            return <InitialMovie />;
           }
           return <NoItemFound />;
         }}
@@ -82,12 +89,17 @@ const SearchContent = () => {
 export default SearchContent;
 
 const styles = StyleSheet.create({
+  listContentContainer: {
+    flexGrow: 1,
+  },
   container: {
     flex: 1,
-    marginTop: 16,
   },
-  itemContainer: {
-    flexDirection: 'row',
+  emptyItemContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    alignContent: 'center',
   },
   image: {
     width: 95,
@@ -100,32 +112,13 @@ const styles = StyleSheet.create({
   },
 });
 
-const MovieItem = ({ item, onPress }) => {
-  const voteAverage = Math.round(item.vote_average * 10) / 10;
-  const genres = movieGenreNames(item.genre_ids);
+const InitialMovie = () => {
   return (
-    <Pressable onPress={() => onPress()}>
-      <View style={styles.itemContainer}>
-        <Image
-          source={{ uri: getPosterUrl(item.poster_path, 'w300') }}
-          defaultSource={require('../../../../assets/movie-placeholder.png')}
-          style={styles.image}
-        />
-        <View>
-          <Text style={{ color: colors.onBackground }}>{item.title}</Text>
-          {item.release_date && (
-            <TextTile text={item.release_date} iconName='calendar-outline' />
-          )}
-          {item.vote_count > 0 && (
-            <TextTile
-              text={`${voteAverage} (${item.vote_count.toLocaleString()})`}
-              iconName='star-outline'
-              styles={{ marginTop: 14 }}
-            />
-          )}
-          {genres && <TextTile text={genres} iconName='basketball-outline' />}
-        </View>
-      </View>
-    </Pressable>
+    <View style={styles.emptyItemContainer}>
+      <Image
+        source={require('../../../../assets/movie-placeholder.png')}
+        style={styles.image}
+      />
+    </View>
   );
 };

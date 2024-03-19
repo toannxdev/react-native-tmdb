@@ -3,8 +3,17 @@ import { fetchSuggestionKeywords } from '../../../../api/movieApi';
 
 export const fetchKeywordSuggestions = createAsyncThunk(
   'keyword/fetchSuggestions',
-  async (keyword, { dispatch }) => {
+  async (keyword, thunkAPI) => {
     try {
+      // If the keyword is the same as the previous keyword, do not fetch again
+      if (keyword === thunkAPI.getState().keyword.keyword) {
+        return;
+      }
+      const { dispatch } = thunkAPI;
+      if (keyword === '') {
+        dispatch(setResults({ results: [], keyword }));
+        return;
+      }
       const { results } = await fetchSuggestionKeywords(keyword);
       dispatch(setResults({ results, keyword }));
     } catch (error) {

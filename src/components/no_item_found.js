@@ -6,7 +6,7 @@ const NoItemFound = () => {
   return (
     <View styles={styles.container}>
       <Image
-        style={{ width: '80%', height: 200 }}
+        style={{ width: '100%', height: 200 }}
         resizeMode='contain'
         source={require('../assets/tmdbq.webp')}
       />
@@ -27,16 +27,19 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    color: 'red',
-    backgroundColor: 'red',
+    alignContent: 'center',
   },
   title: {
     fontSize: 20,
     fontWeight: 'bold',
     color: colors.onBackground,
+    alignSelf: 'center',
+    textAlign: 'center',
   },
   description: {
     fontSize: 13,
     color: colors.gray,
+    alignSelf: 'center',
+    textAlign: 'center',
   },
 });

@@ -24,9 +24,6 @@ const SearchScreen = () => {
     >
       <Search
         onChangeText={(text) => {
-          if (!text) {
-            return;
-          }
           dispatch(fetchKeywordSuggestions(text));
           dispatch(searchMoviesByQuery({ query: text }));
         }}
