@@ -1,13 +1,20 @@
 import React from 'react';
-import { FlatList, Image, StyleSheet, Text, View } from 'react-native';
+import {
+  FlatList,
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import NoItemFound from '../../../../components/no_item_found';
+import ShimmerPlaceholder from '../../../../components/shimmerPlaceholder';
 import colors from '../../../../constants/colors';
 import Status from '../../../../constants/status';
 import { searchMoviesByQuery } from '../slices/movieSearchSlice';
 import KeywordSuggestions from './keywordSuggestions';
-import MovieItem from './movieItem';
-
+import { MovieLoadingItem } from './movieItem';
 let lastQuery = null;
 let onEndReachedCalledDuringMomentum = false;
 
@@ -64,14 +71,11 @@ const SearchContent = () => {
           onEndReachedCalledDuringMomentum = false;
         }}
         contentContainerStyle={styles.listContentContainer}
-        ListHeaderComponent={() => (
-          <View style={{ marginBottom: 16 }}>
-            <KeywordSuggestions />
-          </View>
-        )}
+        ListHeaderComponent={() => <KeywordSuggestions />}
+        ListHeaderComponentStyle={{ marginBottom: 16 }}
         ListEmptyComponent={() => {
           if (status === Status.InProgress) {
-            return <Text style={styles.text}>Shimmer Loading...</Text>;
+            return <MovieLoadingList />;
           }
           if (
             status === Status.Initial ||
@@ -110,6 +114,13 @@ const styles = StyleSheet.create({
   text: {
     color: colors.onBackground,
   },
+  title: {
+    color: 'white',
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginTop: 16,
+    marginBottom: 4,
+  },
 });
 
 const InitialMovie = () => {
@@ -120,5 +131,47 @@ const InitialMovie = () => {
         style={styles.image}
       />
     </View>
+  );
+};
+
+const MovieLoadingList = () => {
+  const randomHeight = () => {
+    return Math.floor(Math.random() * 70) + 100;
+  };
+
+  return (
+    <>
+      <View>
+        <Text style={styles.title}>Maybe you are also looking</Text>
+        <ScrollView
+          contentContainerStyle={{
+            flexDirection: 'row',
+            flexWrap: 'wrap',
+            marginBottom: 16,
+          }}
+        >
+          {[1, 2, 3, 4, 5, 6]
+            .slice(0, 6) // Limit to 6 items
+            .map((_) => (
+              <ShimmerPlaceholder
+                style={{
+                  width: randomHeight(),
+                  height: 20,
+                  borderRadius: 16,
+                  marginEnd: 8,
+                  marginTop: 8,
+                }}
+                visible={false}
+              />
+            ))}
+        </ScrollView>
+      </View>
+      <FlatList
+        data={[1, 2, 3, 4]}
+        keyExtractor={(item) => item.toString()}
+        renderItem={() => <MovieLoadingItem />}
+        ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
+      />
+    </>
   );
 };

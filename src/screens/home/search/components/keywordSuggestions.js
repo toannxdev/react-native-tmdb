@@ -1,10 +1,11 @@
 import React from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
+import ShimmerPlaceholder from '../../../../components/shimmerPlaceholder';
 import { fetchKeywordSuggestions } from '../slices/keywordSlice';
 import { searchMoviesByQuery } from '../slices/movieSearchSlice';
 
-const KeywordSuggestions = () => {
+const KeywordSuggestions = ({ isLoading = false }) => {
   const dispatch = useDispatch();
   const { suggestions } = useSelector((state) => state.keyword);
 
@@ -24,7 +25,9 @@ const KeywordSuggestions = () => {
       <ScrollView contentContainerStyle={styles.wrapList}>
         {suggestions
           .slice(0, 6) // Limit to 6 items
-          .map((item) => TagItem({ item, onPress }))}
+          .map((item) =>
+            isLoading ? TagLoadingItem() : TagItem({ item, onPress })
+          )}
       </ScrollView>
     </View>
   );
@@ -55,6 +58,15 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
 });
+
+const TagLoadingItem = () => {
+  return (
+    <ShimmerPlaceholder
+      style={{ width: 40, height: 20, borderRadius: 16 }}
+      visible={false}
+    />
+  );
+};
 
 const TagItem = ({ item, onPress }) => {
   return (

@@ -1,4 +1,13 @@
-import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import { createRef, useEffect } from 'react';
+import {
+  Animated,
+  Image,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
+import ShimmerPlaceholder from '../../../../components/shimmerPlaceholder';
 import TextTile from '../../../../components/textTile';
 import colors from '../../../../constants/colors';
 import { getPosterUrl, movieGenreNames } from '../../../../utils/utils';
@@ -33,6 +42,58 @@ export default MovieItem = ({ item, onPress }) => {
   );
 };
 
+export const MovieLoadingItem = () => {
+  // Handle animation
+  const avatarRef = createRef();
+  const firstLineRef = createRef();
+  const secondLineRef = createRef();
+  const thirdLineRef = createRef();
+  const fouthLineRef = createRef();
+
+  useEffect(() => {
+    const animated = Animated.stagger(400, [
+      avatarRef.current.getAnimated(),
+      Animated.parallel([
+        firstLineRef.current.getAnimated(),
+        secondLineRef.current.getAnimated(),
+        thirdLineRef.current.getAnimated(),
+        fouthLineRef.current.getAnimated(),
+      ]),
+    ]);
+    Animated.loop(animated).start();
+  }, []);
+
+  const randomHeight = () => Math.floor(Math.random() * 100) + 50;
+
+  return (
+    <View style={styles.container}>
+      <ShimmerPlaceholder style={styles.image} ref={avatarRef} />
+      <View>
+        <ShimmerPlaceholder
+          style={[styles.textHolder, { width: randomHeight() }]}
+          ref={firstLineRef}
+          stopAutoRun
+        />
+        <ShimmerPlaceholder
+          style={[styles.textHolder, { width: randomHeight() }]}
+          ref={secondLineRef}
+          stopAutoRun
+        />
+        <ShimmerPlaceholder
+          style={[styles.textHolder, { width: randomHeight() }]}
+          ref={thirdLineRef}
+          stopAutoRun
+        />
+        <ShimmerPlaceholder
+          style={[styles.textHolder, { width: randomHeight() }]}
+          ref={fouthLineRef}
+          stopAutoRun
+        />
+      </View>
+    </View>
+  );
+};
+
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
@@ -42,5 +103,10 @@ const styles = StyleSheet.create({
     height: 125,
     borderRadius: 10,
     marginRight: 8,
+  },
+  textHolder: {
+    marginTop: 4,
+    borderRadius: 2,
+    height: 16,
   },
 });
